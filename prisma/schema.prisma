@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id         String            @id @default(cuid())
+  name       String
+  parentId   String?
+  includeInLockedIn Boolean    @default(true)
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+  parent     Category?         @relation("CategoryTree", fields: [parentId], references: [id])
+  children   Category[]        @relation("CategoryTree")
+  sessions   ActivitySession[]
+
+  @@index([parentId])
+}
+
+model ActivitySession {
+  id         String    @id @default(cuid())
+  startTime  DateTime
+  endTime    DateTime?
+  categoryId String
+  notes      String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  category   Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@index([startTime])
+  @@index([endTime])
+}
+
+model WakeUpEntry {
+  id        String   @id @default(cuid())
+  date      String   @unique
+  wakeUpAt  DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Habit {
+  id          String            @id @default(cuid())
+  name        String
+  targetLabel String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  completions HabitCompletion[]
+}
+
+model HabitCompletion {
+  id        String   @id @default(cuid())
+  habitId   String
+  date      String
+  completed Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  habit     Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@unique([habitId, date])
+  @@index([date])
+}
+
+model Settings {
+  id                    Int      @id @default(1)
+  projectionWindowDays  Int      @default(14)
+  xpPer10Min            Int      @default(1)
+  lockedInMinThreshold  Int      @default(60)
+  goalHours             Int      @default(500)
+  goalDeadline          DateTime?
+  excludedCategoryIds   String   @default("[]")
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
