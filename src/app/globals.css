@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: dark; }
+body { @apply bg-bg text-zinc-100 min-h-screen; }
+input,select,button,textarea { @apply bg-zinc-900 border border-zinc-700 rounded px-2 py-1; }
+.card { @apply bg-card border border-zinc-800 rounded-xl p-4 shadow-sm; }
